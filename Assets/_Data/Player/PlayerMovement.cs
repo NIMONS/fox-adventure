@@ -2,49 +2,97 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(BoxCollider2D))]
 public class PlayerMovement : FoxMonoBehaviour
 {
 	[SerializeField] protected PlayerCtrl playerCtrl;
+	[SerializeField] protected Rigidbody2D _rigidbody2D;
+	[SerializeField] protected BoxCollider2D _collider2D;
 
-	[SerializeField] protected float moveSpeed = 10f;
+	[SerializeField] protected float moveSpeed = 9f;
 	[SerializeField] protected float jumpForce = 10f;
-	[SerializeField] protected LayerMask groundLayer; // Lớp cho mặt đất
-	private Rigidbody2D rb;
+
+	private bool canDoubleJump =false;
 	private bool isGrounded;
 
-	protected void Start()
+	protected override void LoadComponents()
 	{
-		rb = this.playerCtrl.Model.GetComponent<Rigidbody2D>();
+		base.LoadComponents();
+		this.LoadRigidbody2D();
+		this.LoadPlayerCtrl();
+		this.LoadBoxCollider2D();
 	}
 
-	protected void Update() // Chuyển từ FixedUpdate sang Update
+	protected void LoadBoxCollider2D()
 	{
-		this.HandleInput(); // Xử lý input trong Update
-		this.CheckGrounded(); // Kiểm tra nếu player đang trên mặt đất
+		if (_collider2D != null) return;
+		this._collider2D = transform.GetComponent<BoxCollider2D>();
+		Debug.LogWarning(transform.name + ": LoadBoxCollider2D", gameObject);
+	}
+
+	protected void LoadPlayerCtrl()
+	{
+		if (playerCtrl != null) return;
+		this.playerCtrl = transform.parent.GetComponent<PlayerCtrl>();
+		Debug.LogWarning(transform.name + ": LoadPlayerCtrl", gameObject);
+	}
+
+	protected void LoadRigidbody2D()
+	{
+		if (_rigidbody2D != null) return;
+		this._rigidbody2D = transform.GetComponent<Rigidbody2D>();
+		this._rigidbody2D.gravityScale = 2.8f;
+
+		Debug.LogWarning(transform.name + ": LoadRigidbody2D", gameObject);
+	}
+
+
+
+	protected override void Update() 
+	{
+		this.HandleInput(); 
+		//this.CheckGrounded(); 
 	}
 
 	protected void HandleInput()
 	{
 		float horizontal = Input.GetAxis("Horizontal");
 
-		// Nhảy chỉ khi nhấn phím Space và đang trên mặt đất
 		if (Input.GetKeyDown(KeyCode.Space))
 		{
 			Jump();
 		}
 
-		// Di chuyển player
-		rb.velocity = new Vector2(horizontal * moveSpeed, rb.velocity.y);
+		_rigidbody2D.velocity = new Vector2(horizontal * moveSpeed, _rigidbody2D.velocity.y);
 	}
 
 	private void Jump()
 	{
-		rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+		if (isGrounded)
+		{
+			_rigidbody2D.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+			canDoubleJump = true;
+		}else if (canDoubleJump)
+		{
+			_rigidbody2D.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+			canDoubleJump = false;
+		}
 	}
 
-	// Kiểm tra nếu player đang trên mặt đất
-	protected void CheckGrounded()
+	private void OnCollisionEnter2D(Collision2D collision)
 	{
-		isGrounded = Physics2D.Raycast(transform.position, Vector2.down, 0.1f, groundLayer);
+		if (collision.gameObject.CompareTag("Ground"))
+		{
+			isGrounded = true;
+		}
+	}
+
+	private void OnCollisionExit2D(Collision2D collision)
+	{
+		if (collision.gameObject.CompareTag("Ground"))
+		{
+			isGrounded = false;
+		}
 	}
 }

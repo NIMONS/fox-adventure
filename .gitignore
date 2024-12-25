@@ -14,3 +14,4 @@ MemoryCaptures/
 *.user
 *.booproj
 *.svd
+.vs/
