@@ -65,6 +65,9 @@ public class PlayerMovement : FoxMonoBehaviour
 		}
 
 		_rigidbody2D.velocity = new Vector2(horizontal * moveSpeed, _rigidbody2D.velocity.y);
+		Vector3 currentRotation = _rigidbody2D.transform.rotation.eulerAngles;
+		currentRotation.z = 0;
+		_rigidbody2D.transform.rotation = Quaternion.Euler(currentRotation);
 	}
 
 	private void Jump()
