@@ -13,7 +13,7 @@ public class PlayerMovement : FoxMonoBehaviour
 	public Animator Animator => _animator;
 
 	[SerializeField] protected float moveSpeed = 9f;
-	[SerializeField] protected float jumpForce = 10f;
+	[SerializeField] protected float jumpForce = 8f;
 
 	private bool canDoubleJump =false;
 	private bool isGrounded;
@@ -62,10 +62,6 @@ public class PlayerMovement : FoxMonoBehaviour
 	protected override void Update() 
 	{
 		this.Animation();
-	}
-
-	protected void FixedUpdate()
-	{
 		this.HandleInput();
 
 	}
@@ -74,29 +70,25 @@ public class PlayerMovement : FoxMonoBehaviour
 	{
 		float horizontal = Input.GetAxis("Horizontal");
 
-		if(horizontal != 0)
-		{
-			_animator.SetBool("isRun", true);
-
-			if (horizontal == 1)
-			{
-				transform.localScale = new Vector3(5f, 5f,5f);
-			}
-
-			if (horizontal == -1)
-			{
-				transform.localScale = new Vector3(-5f, 5f, 5f);
-
-			}
-		}else 
-		{
-			_animator.SetBool("isRun", false);
-		}
-
-
 		if (Input.GetKeyDown(KeyCode.Space))
 		{
 			Jump();
+		}
+
+		if (Input.GetKey(KeyCode.A))
+		{
+			transform.localScale = new Vector3(-5f, 5f, 5f);
+			_animator.SetBool("isRun", true);
+		}else if (Input.GetKey(KeyCode.D))
+		{
+			transform.localScale = new Vector3(5f, 5f, 5f);
+			_animator.SetBool("isRun", true);
+		}
+		
+		else
+		{
+			_animator.SetBool("isRun", false);
+
 		}
 
 		_rigidbody2D.velocity = new Vector2(horizontal * moveSpeed, _rigidbody2D.velocity.y);
@@ -108,12 +100,15 @@ public class PlayerMovement : FoxMonoBehaviour
 	{
 		if (isGrounded)
 		{
-			_rigidbody2D.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+			_rigidbody2D.velocity= new Vector2(this._rigidbody2D.velocity.x, jumpForce);
 			canDoubleJump = true;
+			this._animator.SetBool("isJumping", true);
+			this._animator.SetBool("isFalling", false);
 		}else if (canDoubleJump)
 		{
-			_rigidbody2D.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+			_rigidbody2D.velocity = new Vector2(this._rigidbody2D.velocity.x, jumpForce);
 			canDoubleJump = false;
+			this._animator.SetTrigger("isDoubleJump");
 		}
 	}
 
@@ -135,6 +130,18 @@ public class PlayerMovement : FoxMonoBehaviour
 
 	protected void Animation()
 	{
+		Debug.Log(this._rigidbody2D.velocity.y);
+		if(!isGrounded && this._rigidbody2D.velocity.y < 0)
+		{
+			this._animator.SetBool("isJumping", true);
+			this._animator.SetBool("isFalling", false);
+			this._animator.SetBool("isDoubleJump", false);
+		}
 
+		if (isGrounded)
+		{
+			this._animator.SetBool("isJumping", false);
+			this._animator.SetBool("isFalling", false);
+		}
 	}
 }
