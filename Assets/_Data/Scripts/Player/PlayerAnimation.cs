@@ -28,9 +28,9 @@ public class PlayerAnimation : FoxMonoBehaviour
 	protected void Animation()
 	{
 		Animator animator = playerCtrl.Model.Animator;
-		if (animator.GetBool("isRun"))
-		{
-			//de
-		}
+		//if (animator.GetBool("isRun"))
+		//{
+		//	//de
+		//}
 	}
 }

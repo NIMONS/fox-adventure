@@ -61,7 +61,7 @@ public class PlayerMovement : FoxMonoBehaviour
 
 	protected override void Update() 
 	{
-		this.Animation();
+		//this.Animation();
 		this.HandleInput();
 
 	}
@@ -70,24 +70,34 @@ public class PlayerMovement : FoxMonoBehaviour
 	{
 		float horizontal = Input.GetAxis("Horizontal");
 
+		this._animator.SetFloat("isRun", Mathf.Abs(horizontal));
+
 		if (Input.GetKeyDown(KeyCode.Space))
 		{
 			Jump();
+			this._animator.SetBool("isJumping", true);
+
+		}
+		if (Input.GetKeyUp(KeyCode.Space))
+		{
+			this._animator.SetBool("isFalling", true);
+			this._animator.SetBool("isJumping", false);
+			//_animator.SetBool("isRun", false);
+
 		}
 
-		if (Input.GetKey(KeyCode.A))
+
+		if (Input.GetKey(KeyCode.A) )
 		{
 			transform.localScale = new Vector3(-5f, 5f, 5f);
-			_animator.SetBool("isRun", true);
 		}else if (Input.GetKey(KeyCode.D))
 		{
 			transform.localScale = new Vector3(5f, 5f, 5f);
-			_animator.SetBool("isRun", true);
 		}
 		
 		else
 		{
-			_animator.SetBool("isRun", false);
+			//_animator.SetBool("isRun", false);
 
 		}
 
@@ -102,13 +112,12 @@ public class PlayerMovement : FoxMonoBehaviour
 		{
 			_rigidbody2D.velocity= new Vector2(this._rigidbody2D.velocity.x, jumpForce);
 			canDoubleJump = true;
-			this._animator.SetBool("isJumping", true);
-			this._animator.SetBool("isFalling", false);
-		}else if (canDoubleJump)
+		}
+		else if (canDoubleJump)
 		{
 			_rigidbody2D.velocity = new Vector2(this._rigidbody2D.velocity.x, jumpForce);
 			canDoubleJump = false;
-			this._animator.SetTrigger("isDoubleJump");
+			//this._animator.SetTrigger("isDoubleJump");
 		}
 	}
 
@@ -117,6 +126,8 @@ public class PlayerMovement : FoxMonoBehaviour
 		if (collision.gameObject.CompareTag("Ground"))
 		{
 			isGrounded = true;
+			this._animator.SetBool("isFalling", false);
+
 		}
 	}
 
@@ -130,7 +141,7 @@ public class PlayerMovement : FoxMonoBehaviour
 
 	protected void Animation()
 	{
-		Debug.Log(this._rigidbody2D.velocity.y);
+		//Debug.Log(this._rigidbody2D.velocity.y);
 		if(!isGrounded && this._rigidbody2D.velocity.y < 0)
 		{
 			this._animator.SetBool("isJumping", true);
